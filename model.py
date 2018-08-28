@@ -18,7 +18,7 @@ class DCGAN(object):
          batch_size=64, sample_num = 64, output_height=64, output_width=64,
          y_dim=None, z_dim=100, gf_dim=64, df_dim=64,
          gfc_dim=1024, dfc_dim=1024, c_dim=3, dataset_name='default',
-         input_fname_pattern='*.jpg', checkpoint_dir=None, sample_dir=None, data_dir='./data'):
+         input_fname_pattern='*.png', checkpoint_dir=None, sample_dir=None, data_dir='./data', dataset_image_list=None):
     """
 
     Args:
@@ -75,8 +75,15 @@ class DCGAN(object):
       self.data_X, self.data_y = self.load_mnist()
       self.c_dim = self.data_X[0].shape[-1]
     else:
-      data_path = os.path.join(self.data_dir, self.dataset_name, self.input_fname_pattern)
-      self.data = glob(data_path)
+
+      if dataset_image_list:
+        print('using image list ' + dataset_image_list)
+        self.data = open(dataset_image_list).read().splitlines()
+      else:
+        data_path = os.path.join(self.data_dir, self.dataset_name, self.input_fname_pattern)
+        self.data = glob(data_path)
+
+
       if len(self.data) == 0:
         raise Exception("[!] No data found in '" + data_path + "'")
       np.random.shuffle(self.data)
@@ -173,6 +180,7 @@ class DCGAN(object):
       sample_labels = self.data_y[0:self.sample_num]
     else:
       sample_files = self.data[0:self.sample_num]
+      print(len(sample_files))
       sample = [
           get_image(sample_file,
                     input_height=self.input_height,
